@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- You may freely edit this file. See commented blocks below for -->
+<!-- some examples of how to customize the build. -->
+<!-- (If you delete it and reopen the project it will be recreated.) -->
+<project name="AntProject" default="default" basedir="..">
+
+    <path id="classpath.core">
+        <fileset dir="dist">
+            <include name="*.jar"/>
+        </fileset>
+    </path>
+
+    <taskdef name="unsignjars" classname="nl.ow.dilemma.ant.jar.UnsignJarTask">
+        <classpath refid="classpath.core"/>
+    </taskdef>
+    
+    <taskdef name="normalizejars" classname="nl.ow.dilemma.ant.jar.NormalizeJarTask">
+        <classpath refid="classpath.core"/>
+    </taskdef>
+    
+    <taskdef name="packjars" classname="nl.ow.dilemma.ant.jar.Pack200Task">
+        <classpath refid="classpath.core"/>
+    </taskdef>
+    
+    <taskdef name="svninfo" classname="nl.ow.dilemma.ant.svn.SubversionInfoTask">
+        <classpath refid="classpath.core"/>
+    </taskdef>
+    
+    <target name="default" >
+    
+        <!-- example of SVN task 
+        <svninfo file="data/entries.xml"/>
+                        
+        <echo>${svn.revision}</echo>
+        <echo>${svn.date}</echo> -->
+        
+        <!-- example of unsigning jarfile -->
+        <copy file="data/jars/xmldb.jar" tofile="data/jars/un_signed.jar"  />
+        <unsignjars>
+            <fileset dir="data/jars">
+                <include name="un_signed.jar"/>
+            </fileset>
+        </unsignjars>
+        
+        
+        <!-- Example on how to create .pack.gz files -->
+        <packjars>
+            <fileset dir="data/jars">
+                <include name="xmldb.jar"/>
+            </fileset>
+        </packjars>
+        
+    </target>
+        
+        
+        
+</project>
