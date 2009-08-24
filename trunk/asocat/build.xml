@@ -67,18 +67,17 @@
     nbproject/build-impl.xml file. 
 
     -->
-    <available file="lib/commons-io-1.2.jar" property="jar-present" />
+    <available file="lib/commons-io-1.4.jar" property="jar-present" />
 
     <target name="-pre-compile" unless="jar-present">
     	
-        <get src="http://www.ibiblio.org/maven2/ant/ant/1.6.5/ant-1.6.5.jar"
-                dest="lib/ant-1.6.5.jar" verbose="true" />
+        <get src="http://repo1.maven.org/maven2/org/apache/ant/ant/1.7.1/ant-1.7.1.jar"
+                dest="lib/ant-1.7.1.jar" verbose="true" />
                 
-        <get src="http://mirrors.ibiblio.org/pub/mirrors/maven2/com/svnkit/svnkit/1.1.0/svnkit-1.1.0.jar"
-                dest="lib/svnkit-1.1.0.jar" verbose="true" />
+       
                 
-        <get src="http://mirrors.ibiblio.org/pub/mirrors/maven2/commons-io/commons-io/1.2/commons-io-1.2.jar"
-                dest="lib/commons-io-1.2.jar" verbose="true" />
+        <get src="http://mirrors.ibiblio.org/pub/mirrors/maven2/commons-io/commons-io/1.4/commons-io-1.4.jar"
+                dest="lib/commons-io-1.4.jar" verbose="true" />
                 
     </target>
 </project>
