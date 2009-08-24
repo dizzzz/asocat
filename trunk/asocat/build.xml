@@ -74,7 +74,16 @@
         <get src="http://repo1.maven.org/maven2/org/apache/ant/ant/1.7.1/ant-1.7.1.jar"
                 dest="lib/ant-1.7.1.jar" verbose="true" />
                 
-       
+<get src="http://www.svnkit.com/org.tmatesoft.svn_1.3.0.standalone.zip"
+      dest="lib/svnkit.zip" verbose="true"/>
+
+        <unzip src="lib/svnkit.zip" dest="lib">
+            <patternset>
+                <include name="**/svnkit.jar"/>
+                <include name="**/svnkit-cli.jar"/>
+            </patternset>
+            <mapper type="flatten"/>
+        </unzip>
                 
         <get src="http://mirrors.ibiblio.org/pub/mirrors/maven2/commons-io/commons-io/1.4/commons-io-1.4.jar"
                 dest="lib/commons-io-1.4.jar" verbose="true" />
