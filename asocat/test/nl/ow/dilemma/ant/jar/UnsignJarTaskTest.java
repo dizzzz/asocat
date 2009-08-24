@@ -33,10 +33,12 @@ public class UnsignJarTaskTest extends TestCase {
     }
 
 
-    public void testLargeFile() {
+    public void testLargeFile() throws Exception {
         System.out.println("testLargeFile");
+
+        UnsignJarImpl uj = new UnsignJarImpl();
         
-        UnsignJarImpl.unsign( new File("large.jar") );
+        uj.unsign( new File("large.jar") );
 
     }
     
