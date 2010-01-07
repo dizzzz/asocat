@@ -37,8 +37,8 @@ import org.apache.tools.ant.types.FileSet;
  */
 public class RepackJarTask extends Task {
     
-    private List filesets = new ArrayList();
-    private Pack200Impl jt = new Pack200Impl();
+    private List<FileSet> filesets = new ArrayList<FileSet>();
+
     
     /**
      * Create FileSet object that will be filled by ant.
@@ -65,26 +65,27 @@ public class RepackJarTask extends Task {
      *
      * @throws BuildException if something goes wrong with the build
      */
+    @Override
     public void execute() throws BuildException {
         
-        if(!jt.hasPack200()){
+        if(!Pack200Impl.hasPack200()){
             throw new BuildException("Pack200 not available, please use Java5+");
         }
+
+        Pack200Impl jt = new Pack200Impl();
         
         // Search all file sets
-        for (int i = 0, size = filesets.size(); i < size; i++) {
+        for (FileSet fs : filesets) {
             
-            // Get files from fileset.
-            FileSet fs = (FileSet) filesets.get(i);
             DirectoryScanner scanner = fs.getDirectoryScanner(getProject());
             scanner.scan();
             String[] files = scanner.getIncludedFiles();
             
             try {
                 // Perform action per entry.
-                for(int j=0; j<files.length; j++){
-                    log("Normalizing " + files[j]);
-                    jt.repack( new File(scanner.getBasedir(), files[j]) );
+                for(String file: files){
+                    log("Normalizing " + file);
+                    jt.repack( new File(scanner.getBasedir(), file) );
                 }
             } catch (IOException ex) {
                 throw new BuildException(ex.getMessage());
