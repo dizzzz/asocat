@@ -64,6 +64,7 @@ public class SubversionInfoTask extends Task {
      * Called by the project to let the task do its work.
      * @throws BuildException if something goes wrong with the build
      */
+    @Override
     public void execute() throws BuildException {
         
         if(url==null){
