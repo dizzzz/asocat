@@ -37,21 +37,19 @@ import org.apache.tools.ant.types.FileSet;
  */
 public class UnsignJarTask extends Task {
     
-    private List filesets = new ArrayList();
-    private Pack200Impl jt = new Pack200Impl();
+    private List<FileSet> filesets = new ArrayList<FileSet>();
     
     /**
      * Called by the project to let the task do its work.
      *
      * @throws BuildException if something goes wrong with the build
      */
+    @Override
     public void execute() throws BuildException {
                 
         // Search all file sets
-        for (int i = 0, size = filesets.size(); i < size; i++) {
+        for (FileSet fs : filesets) {
             
-            // Get files from fileset.
-            FileSet fs = (FileSet) filesets.get(i);
             DirectoryScanner scanner = fs.getDirectoryScanner(getProject());
             scanner.scan();
             String[] files = scanner.getIncludedFiles();
@@ -60,9 +58,9 @@ public class UnsignJarTask extends Task {
             try {
                             
                 // Perform action per entry.
-                for(int j=0; j<files.length; j++){
-                    log("Unsigning " + files[j]);
-                    uji.unsign( new File(scanner.getBasedir(), files[j]) );
+                for(String file: files){
+                    log("Unsigning " + files);
+                    uji.unsign( new File(scanner.getBasedir(), file) );
                 }
             } catch (IOException ex) {
                 throw new BuildException(ex.getMessage());

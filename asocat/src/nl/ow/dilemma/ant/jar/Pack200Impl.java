@@ -28,6 +28,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+
+import java.util.UUID;
 import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Pack200;
@@ -67,7 +69,7 @@ public class Pack200Impl {
      */
     public void repack(File file) throws IOException{
         
-        File tmpfile = File.createTempFile("repack2","tmp");
+        File tmpfile = new File(file.getParent(), "repack_"+UUID.randomUUID().toString() + ".tmp");
 
         pack(file, tmpfile, false);
         unpack(tmpfile, file, false);

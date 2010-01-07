@@ -29,6 +29,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.UUID;
+
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 import java.util.jar.JarOutputStream;
@@ -60,7 +62,7 @@ public class UnsignJarImpl {
         
         File tmpFile = null;
         try {
-            tmpFile = File.createTempFile("unsign","tmp");
+            tmpFile = new File(jarfile.getParent(), "unsigner_"+UUID.randomUUID().toString() + ".tmp");
             BufferedOutputStream bos
                     = new BufferedOutputStream( new FileOutputStream(tmpFile) );
             BufferedInputStream bis
@@ -97,29 +99,27 @@ public class UnsignJarImpl {
         Manifest manifest = jis.getManifest();
         if(manifest==null){
             jos = new JarOutputStream(os);
+            
         } else{
             manifest.getEntries().clear();
             jos = new JarOutputStream(os, manifest);
         }
         
-        byte[] buffer = null;
-        
         JarEntry src;
         while((src=jis.getNextJarEntry())!= null) {
             
             String name=src.getName();
-            String lName=name.toLowerCase();
+            String lowercaseName=name.toLowerCase();
             
             // Filter files used for jar signing
-            if( lName.startsWith("meta-inf") &&
-                    ( lName.endsWith(".rsa") || lName.endsWith(".dsa") || lName.endsWith(".sf") )) {
+            if( lowercaseName.startsWith("meta-inf") &&
+                    ( lowercaseName.endsWith(".rsa") || lowercaseName.endsWith(".dsa") || lowercaseName.endsWith(".sf") )) {
                 //No op
                 
             } else {
                 //buffer = getNextResource(jis);
                 JarEntry dest = new JarEntry( name );
                 jos.putNextEntry(dest);
-                //jos.write(buffer);
                 copyContent(jis,jos);
             }
         }
