@@ -59,7 +59,7 @@ public class UnsignJarTask extends Task {
                             
                 // Perform action per entry.
                 for(String file: files){
-                    log("Unsigning " + files);
+                    log("Unsigning " + file);
                     uji.unsign( new File(scanner.getBasedir(), file) );
                 }
             } catch (IOException ex) {
