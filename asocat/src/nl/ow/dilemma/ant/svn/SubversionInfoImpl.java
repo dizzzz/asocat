@@ -17,16 +17,19 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
-
 package nl.ow.dilemma.ant.svn;
 
+import java.io.File;
+
 import org.tmatesoft.svn.core.SVNException;
-import org.tmatesoft.svn.core.SVNURL;
-import org.tmatesoft.svn.core.auth.ISVNAuthenticationManager;
+
 import org.tmatesoft.svn.core.internal.io.dav.DAVRepositoryFactory;
 import org.tmatesoft.svn.core.internal.io.svn.SVNRepositoryFactoryImpl;
-import org.tmatesoft.svn.core.io.SVNRepository;
-import org.tmatesoft.svn.core.io.SVNRepositoryFactory;
+import org.tmatesoft.svn.core.internal.wc.DefaultSVNOptions;
+
+import org.tmatesoft.svn.core.wc.SVNClientManager;
+import org.tmatesoft.svn.core.wc.SVNInfo;
+import org.tmatesoft.svn.core.wc.SVNRevision;
 import org.tmatesoft.svn.core.wc.SVNWCUtil;
 
 /**
@@ -35,7 +38,7 @@ import org.tmatesoft.svn.core.wc.SVNWCUtil;
  * @author Dannes Wessels
  */
 public class SubversionInfoImpl {
-    
+
     /*
      * Initialize library for https
      */
@@ -43,14 +46,14 @@ public class SubversionInfoImpl {
         DAVRepositoryFactory.setup();
         SVNRepositoryFactoryImpl.setup();
     }
-    
+
     /**
      * Creates a new instance of SubversionInfoImpl
      */
     public SubversionInfoImpl() {
         setupSVN();
     }
-    
+
     /**
      * Get Subversion Revision from SVN server.
      *
@@ -60,19 +63,13 @@ public class SubversionInfoImpl {
      * @throws SVNException javaSVN exception
      * @return SVN revision id, -1 when an error occured.
      */
-    public long getRevision(String url, String username, String password) throws SVNException {
-        
-        long svnRevision=-1;
-        SVNRepository svnRepository = null;
-        
-        svnRepository = SVNRepositoryFactory.create(SVNURL.parseURIEncoded(url));
-        
-        ISVNAuthenticationManager authManager = SVNWCUtil.createDefaultAuthenticationManager(username, password);
-        svnRepository.setAuthenticationManager(authManager);
-        
-        svnRevision = svnRepository.getLatestRevision();
-        
-        return svnRevision;
+    public long getRevision(String username, String password) throws SVNException {
+
+        DefaultSVNOptions options = SVNWCUtil.createDefaultOptions(true);
+
+        SVNClientManager ourClientManager = SVNClientManager.newInstance(options, username, password);
+
+        SVNInfo info = ourClientManager.getWCClient().doInfo(new File("."), SVNRevision.WORKING);
+        return info.getRevision().getNumber();
     }
-    
 }

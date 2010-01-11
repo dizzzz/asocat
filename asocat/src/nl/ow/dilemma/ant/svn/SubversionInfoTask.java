@@ -33,15 +33,7 @@ public class SubversionInfoTask extends Task {
     
     private String username=null;
     private String password=null;
-    private String url=null;
     
-    /**
-     * Set URL for SVN access.
-     * @param url SVN url
-     */
-    public void setUrl(String url) {
-        this.url = url;
-    }
     
     /**
      * Set username for SVN access.
@@ -67,9 +59,6 @@ public class SubversionInfoTask extends Task {
     @Override
     public void execute() throws BuildException {
         
-        if(url==null){
-            throw new BuildException("SVN: Please provide url");
-        }
         
         if(username==null){
             throw new BuildException("SVN: Please provide username, e.g. anonymous");
@@ -82,7 +71,8 @@ public class SubversionInfoTask extends Task {
         SubversionInfoImpl jsh = new SubversionInfoImpl();
         long revision=-1;
         try {
-            revision = jsh.getRevision(url, username, password);
+            revision = jsh.getRevision(username, password);
+            
         } catch (SVNException ex) {
             throw new BuildException(ex);
         }
