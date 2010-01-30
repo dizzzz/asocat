@@ -69,7 +69,7 @@ public class SubversionInfoImpl {
 
         SVNClientManager ourClientManager = SVNClientManager.newInstance(options, username, password);
 
-        SVNInfo info = ourClientManager.getWCClient().doInfo(new File("."), SVNRevision.WORKING);
-        return info.getRevision().getNumber();
+        SVNInfo info = ourClientManager.getWCClient().doInfo(new File("."), SVNRevision.COMMITTED);
+        return info.getCommittedRevision().getNumber();
     }
 }
