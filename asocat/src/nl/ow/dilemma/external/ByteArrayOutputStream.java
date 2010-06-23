@@ -54,7 +54,7 @@ public class ByteArrayOutputStream extends OutputStream {
     private static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
 
     /** The list of buffers, which grows and never reduces. */
-    private List buffers = new ArrayList();
+    private List<byte[]> buffers = new ArrayList<byte[]>();
     /** The index of the current buffer. */
     private int currentBufferIndex;
     /** The total count of bytes in all the filled buffers. */

@@ -71,10 +71,10 @@
 
     <target name="-pre-compile" unless="jar-present">
     	
-        <get src="http://repo1.maven.org/maven2/org/apache/ant/ant/1.7.1/ant-1.7.1.jar"
-                dest="lib/ant-1.7.1.jar" verbose="true" />
+        <get src="http://repo2.maven.org/maven2/org/apache/ant/ant/1.8.1/ant-1.8.1.jar"
+                dest="lib/ant-1.8.1.jar" verbose="true" />
                 
-<get src="http://www.svnkit.com/org.tmatesoft.svn_1.3.0.standalone.zip"
+<get src="http://www.svnkit.com/org.tmatesoft.svn_1.3.3.standalone.zip"
       dest="lib/svnkit.zip" verbose="true"/>
 
         <unzip src="lib/svnkit.zip" dest="lib">
