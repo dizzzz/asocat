@@ -56,8 +56,6 @@ public class SubversionInfoImpl {
 
     /**
      * Get Subversion Revision from SVN server.
-     *
-     * @param url SVN url
      * @param username SVN username
      * @param password SVN password
      * @throws SVNException javaSVN exception
