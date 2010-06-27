@@ -1,13 +1,30 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * FetchTask.java
+ *
+ * Copyright (C) 2010  Dannes Wessels (dizzzz_at_gmail_com)
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  */
 package nl.ow.dilemma.ant.fetch;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Task;
 import org.apache.tools.ant.taskdefs.Available;
@@ -20,23 +37,32 @@ import org.apache.tools.ant.types.Reference;
 import org.apache.tools.ant.util.FlatFileNameMapper;
 
 /**
+ * Ant task for download and unzip files from internet. Temporary files are automatically cleaned
+ * up. This task is a wrapper around existing tasks.
  *
- * @author wessels
+ * @see org.apache.tools.ant.taskdefs.Available
+ * @see org.apache.tools.ant.taskdefs.Get
+ * @see org.apache.tools.ant.taskdefs.Expand
+ *
+ * @author Dannes Wessels
  */
 public class FetchTask extends Task {
 
-//    private Expand expandTask;
     private URL downloadUrl;
     private File destination;
     private String className;
     private Path classpath;
-    private PatternSet ps = new PatternSet();
+    private List<PatternSet> patternSets = new ArrayList<PatternSet>();
 
+    /**
+     *  Execute task, called by Ant after setting all attributes.
+     * @throws BuildException When something bad happens,
+     */
     @Override
     public void execute() throws BuildException {
 
 
-        // If class name is set, check availability class
+        // If class name is set, check availability class.
         if (className != null) {
 
             // Setup taskdef Available
@@ -45,7 +71,7 @@ public class FetchTask extends Task {
             av.setProject(getProject());
             av.setClasspath(classpath);
 
-            // Perform actual check
+            // Perform actual check on availability class.
             if (av.eval()) {
                 log("Class " + className + " is already present, skipping download.");
                 return;
@@ -57,7 +83,7 @@ public class FetchTask extends Task {
         try {
             tmpFile = File.createTempFile("FetchTask", "tmp");
             getFromUrl(downloadUrl, tmpFile);
-            unzipToDirectory(tmpFile, destination, ps);
+            unzipToDirectory(tmpFile, destination, patternSets);
 
         } catch (IOException ex) {
             throw new BuildException(ex);
@@ -74,6 +100,7 @@ public class FetchTask extends Task {
      *
      * @param url   URL of to-be-downloaded file
      * @param tmp   Store Location for downloaded file
+     * 
      * @throws BuildException Thrown when something wrong happens.
      */
     private void getFromUrl(URL url, File tmp) throws BuildException {
@@ -93,51 +120,77 @@ public class FetchTask extends Task {
     }
 
     /**
-     *  Unzip file to specified directory
+     *  Unzip file to specified directory.
      *
-     * @param zipFile   Zip file
+     * @param zipFile         Zip file
      * @param unzipDirectory  Location to unzip files in.
+     * @param allPatternSets  Collecttion of all pattern sets.
+     *
+     * @throws BuildException Thrown when something unexpected happens.
      */
-    private void unzipToDirectory(File zipFile, File unzipDirectory, PatternSet set) throws BuildException {
+    private void unzipToDirectory(File zipFile, File unzipDirectory, List<PatternSet> allPatternSets) throws BuildException {
 
+        // Check if unzip location exists and isn't a regular file
         if (unzipDirectory.exists() && !unzipDirectory.isDirectory()) {
             throw new BuildException(unzipDirectory.getAbsolutePath() + "already exists and is not an directory.");
         }
 
+        // If unzip directory does not exist, create it.
         if (!unzipDirectory.exists()) {
             log("Creating " + getCanonicalPath(unzipDirectory));
             unzipDirectory.mkdirs();
         }
 
+        // Setup expand task
         Expand expandTask = new Expand();
         expandTask.setProject(getProject());
         expandTask.setSrc(zipFile);
         expandTask.setDest(getCanonicalFile(unzipDirectory));
         expandTask.setTaskName(getTaskName());
-        expandTask.addPatternset(set);
 
-        //Note that the file patterns are already registered to the expand task.
-        Mapper m = expandTask.createMapper();
-        m.add(new FlatFileNameMapper());
+        // Add all patterns to expand task
+        for (PatternSet patternSet : allPatternSets) {
+            expandTask.addPatternset(patternSet);
+        }
 
-        // perform execution
+        // The files should be extracted without hierarchy
+        Mapper mapper = expandTask.createMapper();
+        mapper.add(new FlatFileNameMapper());
+
+        // Perform actual unzip
         expandTask.execute();
     }
 
-    public void setUrl(URL u) {
-        downloadUrl = u;
+    /**
+     *  Set download URL, invoked by Ant.
+     * @param url Location of file.
+     */
+    public void setUrl(URL url) {
+        downloadUrl = url;
     }
 
-    public void setDest(File d) {
-        destination = d;
+    /**
+     *  Set destination of unzipped files, invoked by Ant.
+     * @param dest
+     */
+    public void setDest(File dest) {
+        destination = dest;
     }
 
+    /**
+     * Set pettern of to be unzipped ziles, invoked by Ant.
+     * @param set Patterns to match file sin ZIP file.
+     */
     public void addPatternset(PatternSet set) {
-        ps.append(set, getProject());
+        patternSets.add(set);
     }
 
-    public void setClassname(String n) {
-        this.className = n;
+    /**
+     * Set classname that is checked to be present, invoked by Ant.
+     * @param name Name of class.
+     */
+    public void setClassname(String name) {
+        this.className = name;
     }
 
     /**
