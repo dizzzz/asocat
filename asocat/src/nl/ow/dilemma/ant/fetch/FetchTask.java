@@ -79,26 +79,33 @@ public class FetchTask extends Task {
             }
         }
 
-        if(patternSets.size()>0){
+        
             // Execute get and unzip
             File tmpFile = null;
             try {
                 tmpFile = File.createTempFile("FetchTask", "tmp");
                 getFromUrl(downloadUrl, tmpFile);
-                unzipToDirectory(tmpFile, destination, patternSets);
 
-            } catch (IOException ex) {
+                if(patternSets.size()>0){
+                    // Patterns supplied, extract
+                    unzipToDirectory(tmpFile, destination, patternSets);
+
+                } else {
+                    // Copy file
+                    File destFile = new File(destination, getFile(downloadUrl));
+                    log("Moving to "+destFile.getAbsolutePath());
+                    tmpFile.renameTo(destFile);
+                }
+
+            } catch (Exception ex) {
                 throw new BuildException(ex);
 
             } finally {
-                if (tmpFile != null) {
+                if (tmpFile != null && patternSets.size()>0) {
                     tmpFile.delete();
                 }
             }
 
-        } else {
-            // Just the file, do not do anything
-        }
     }
 
     /**
@@ -252,5 +259,15 @@ public class FetchTask extends Task {
      */
     public void setClasspathRef(Reference reference) {
         createClasspath().setRefid(reference);
+    }
+
+
+    private String getFile(URL url){
+        String path=url.getPath();
+        if(path.contains("/")){
+            int position = path.lastIndexOf("/");
+            return path.substring(position);
+        }
+        return path;
     }
 }
