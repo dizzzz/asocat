@@ -55,7 +55,8 @@ public class FetchTask extends Task {
     private List<PatternSet> patternSets = new ArrayList<PatternSet>();
 
     /**
-     *  Execute task, called by Ant after setting all attributes.
+     *  Execute task, called by Ant after setting all attributes. If no patterns are set
+     * the file is not extracted nor deleted
      * @throws BuildException When something bad happens,
      */
     @Override
@@ -78,20 +79,25 @@ public class FetchTask extends Task {
             }
         }
 
-        // Execute get and unzip
-        File tmpFile = null;
-        try {
-            tmpFile = File.createTempFile("FetchTask", "tmp");
-            getFromUrl(downloadUrl, tmpFile);
-            unzipToDirectory(tmpFile, destination, patternSets);
+        if(patternSets.size()>0){
+            // Execute get and unzip
+            File tmpFile = null;
+            try {
+                tmpFile = File.createTempFile("FetchTask", "tmp");
+                getFromUrl(downloadUrl, tmpFile);
+                unzipToDirectory(tmpFile, destination, patternSets);
 
-        } catch (IOException ex) {
-            throw new BuildException(ex);
+            } catch (IOException ex) {
+                throw new BuildException(ex);
 
-        } finally {
-            if (tmpFile != null) {
-                tmpFile.delete();
+            } finally {
+                if (tmpFile != null) {
+                    tmpFile.delete();
+                }
             }
+
+        } else {
+            // Just the file, do not do anything
         }
     }
 
