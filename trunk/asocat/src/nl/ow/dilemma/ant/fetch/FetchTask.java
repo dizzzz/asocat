@@ -20,10 +20,15 @@
 package nl.ow.dilemma.ant.fetch;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+
 
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Task;
@@ -53,6 +58,7 @@ public class FetchTask extends Task {
     private String className;
     private Path classpath;
     private List<PatternSet> patternSets = new ArrayList<PatternSet>();
+    private boolean useCache = false;
 
     /**
      *  Execute task, called by Ant after setting all attributes. If no patterns are set
@@ -84,20 +90,45 @@ public class FetchTask extends Task {
         // Execute get and unzip
         File tmpFile = null;
         String filename = getFile(downloadUrl);
-        try {
-            tmpFile = File.createTempFile("FetchTask", "tmp");
-            getFromUrl(downloadUrl, tmpFile);
 
-            if (patternSets.size() > 0) {
-                // Patterns supplied, extract
-                unzipToDirectory(tmpFile, destination, patternSets);
+        try {
+            // Try to get localFile
+            File localFile = getCachedFile(filename);
+
+            if (localFile != null && useCache) {
+                // File is in archive, so copy from local disk
+                if (patternSets.size() > 0) {
+                    // Patterns supplied, extract
+                    unzipToDirectory(localFile, destination, patternSets);
+                } else {
+                    log("Copy file from cache: " + localFile.getCanonicalPath());
+                    copyFileToDirectory(localFile, null, destination);
+                }
 
             } else {
-                // Copy file
-                File destFile = new File(destination, filename);
-                log("Moving to " + destFile.getAbsolutePath());
-                tmpFile.renameTo(destFile);
+                // Cached file does not exist
+                tmpFile = File.createTempFile("FetchTask", "tmp");
+                getFromUrl(downloadUrl, tmpFile);
+
+                // Copy file to cache
+                if (useCache) {
+                    File fetchDir = getFetchDir();
+                    log("Write file " + filename + " to cache " + fetchDir);
+                    copyFileToDirectory(tmpFile, filename, fetchDir);
+                }
+
+                if (patternSets.size() > 0) {
+                    // Patterns supplied, extract
+                    unzipToDirectory(tmpFile, destination, patternSets);
+
+                } else {
+                    // Move file
+                    File destFile = new File(destination, filename);
+                    log("Moving to " + destFile.getAbsolutePath());
+                    tmpFile.renameTo(destFile);
+                }
             }
+
 
         } catch (Exception ex) {
             throw new BuildException(ex);
@@ -263,12 +294,113 @@ public class FetchTask extends Task {
         createClasspath().setRefid(reference);
     }
 
+    public boolean getUsecache() {
+        return useCache;
+    }
+
+    public void setUsecache(boolean use) {
+        useCache = use;
+    }
+
+    /**
+     *  Extract filename from URL
+     */
     private String getFile(URL url) {
         String path = url.getPath();
         if (path.contains("/")) {
             int position = path.lastIndexOf("/");
-            return path.substring(position);
+            return path.substring(position + 1);
         }
         return path;
+    }
+
+    /**
+     * Get file from local fetch directory.
+     *
+     * @param fileName Name to be fetched locally
+     * @return The file, else NULL
+     */
+    private File getCachedFile(String fileName) {
+
+        File fetchDir = getFetchDir();
+
+        File file = new File(fetchDir, fileName);
+        if (!file.exists()) {
+            return null;
+        }
+
+        if (!file.canRead()) {
+            throw new BuildException(fetchDir.getAbsolutePath() + " is not readable");
+        }
+
+        return file;
+    }
+
+    /**
+     *  Get reference to and create fetchdir
+     */
+    private File getFetchDir() {
+
+        File homedir = new File(System.getProperty("user.home"));
+
+        File fetchDir = new File(homedir, ".fetch");
+        if (fetchDir.exists()) {
+            if (!fetchDir.isDirectory()) {
+                throw new BuildException(fetchDir.getAbsolutePath() + " is not a directory");
+            }
+            if (!fetchDir.canWrite()) {
+                throw new BuildException(fetchDir.getAbsolutePath() + " is not writable");
+            }
+        } else {
+            log("Creating fetch local cache directory " + fetchDir.getAbsolutePath());
+            fetchDir.mkdirs();
+        }
+        return fetchDir;
+    }
+
+    /**
+     *  Copy file to directory
+     */
+    private void copyFileToDirectory(File src, String name, File directory) {
+        InputStream in = null;
+        OutputStream out = null;
+        try {
+            if (name == null) {
+                name = src.getName();
+            }
+            File toFile = new File(directory, name);
+
+            in = new FileInputStream(src);
+            out = new FileOutputStream(toFile);
+
+            // Transfer bytes from in to out
+            byte[] buf = new byte[4096];
+            int len;
+            while ((len = in.read(buf)) > 0) {
+                out.write(buf, 0, len);
+            }
+            in.close();
+            out.flush();
+            out.close();
+
+        } catch (Throwable ex) {
+            throw new BuildException(ex);
+
+        } finally {
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException ex) {
+                    //
+                }
+            }
+            if (out != null) {
+                try {
+                    out.close();
+                } catch (IOException ex) {
+                    //
+                }
+            }
+        }
     }
 }
