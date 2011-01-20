@@ -57,6 +57,7 @@ public class FetchTask extends Task {
     /**
      *  Execute task, called by Ant after setting all attributes. If no patterns are set
      * the file is not extracted nor deleted
+     * 
      * @throws BuildException When something bad happens,
      */
     @Override
@@ -79,32 +80,33 @@ public class FetchTask extends Task {
             }
         }
 
-        
-            // Execute get and unzip
-            File tmpFile = null;
-            try {
-                tmpFile = File.createTempFile("FetchTask", "tmp");
-                getFromUrl(downloadUrl, tmpFile);
 
-                if(patternSets.size()>0){
-                    // Patterns supplied, extract
-                    unzipToDirectory(tmpFile, destination, patternSets);
+        // Execute get and unzip
+        File tmpFile = null;
+        String filename = getFile(downloadUrl);
+        try {
+            tmpFile = File.createTempFile("FetchTask", "tmp");
+            getFromUrl(downloadUrl, tmpFile);
 
-                } else {
-                    // Copy file
-                    File destFile = new File(destination, getFile(downloadUrl));
-                    log("Moving to "+destFile.getAbsolutePath());
-                    tmpFile.renameTo(destFile);
-                }
+            if (patternSets.size() > 0) {
+                // Patterns supplied, extract
+                unzipToDirectory(tmpFile, destination, patternSets);
 
-            } catch (Exception ex) {
-                throw new BuildException(ex);
-
-            } finally {
-                if (tmpFile != null && patternSets.size()>0) {
-                    tmpFile.delete();
-                }
+            } else {
+                // Copy file
+                File destFile = new File(destination, filename);
+                log("Moving to " + destFile.getAbsolutePath());
+                tmpFile.renameTo(destFile);
             }
+
+        } catch (Exception ex) {
+            throw new BuildException(ex);
+
+        } finally {
+            if (tmpFile != null && patternSets.size() > 0) {
+                tmpFile.delete();
+            }
+        }
 
     }
 
@@ -261,10 +263,9 @@ public class FetchTask extends Task {
         createClasspath().setRefid(reference);
     }
 
-
-    private String getFile(URL url){
-        String path=url.getPath();
-        if(path.contains("/")){
+    private String getFile(URL url) {
+        String path = url.getPath();
+        if (path.contains("/")) {
             int position = path.lastIndexOf("/");
             return path.substring(position);
         }
