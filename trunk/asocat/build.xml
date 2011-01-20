@@ -67,7 +67,7 @@
     nbproject/build-impl.xml file. 
 
     -->
-    <available file="lib/commons-io-1.4.jar" property="jar-present" />
+    <available file="lib/commons-io-2.0.1.jar" property="jar-present" />
 
     <target name="-pre-compile" unless="jar-present">
     	
@@ -85,8 +85,8 @@
             <mapper type="flatten"/>
         </unzip>
                 
-        <get src="http://mirrors.ibiblio.org/pub/mirrors/maven2/commons-io/commons-io/1.4/commons-io-1.4.jar"
-                dest="lib/commons-io-1.4.jar" verbose="true" />
+        <get src="http://mirrors.ibiblio.org/pub/mirrors/maven2/commons-io/commons-io/2.0.1/commons-io-2.0.1.jar"
+                dest="lib/commons-io-2.0.1.jar" verbose="true" />
                 
     </target>
 </project>
