@@ -29,7 +29,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Task;
 import org.apache.tools.ant.taskdefs.Available;
@@ -59,6 +58,9 @@ public class FetchTask extends Task {
     private Path classpath;
     private List<PatternSet> patternSets = new ArrayList<PatternSet>();
     private boolean useCache = false;
+    
+    private int maxtime=0;
+    private boolean failonerror=true;
 
     /**
      *  Execute task, called by Ant after setting all attributes. If no patterns are set
@@ -131,7 +133,11 @@ public class FetchTask extends Task {
 
 
         } catch (Exception ex) {
-            throw new BuildException(ex);
+            if(failonerror){
+                throw new BuildException(ex);
+            } else {
+                log(ex.getMessage());
+            }
 
         } finally {
             if (tmpFile != null && patternSets.size() > 0) {
@@ -157,6 +163,7 @@ public class FetchTask extends Task {
             getTask.setDest(tmp);
             getTask.setVerbose(true);
             getTask.setRetries(5);
+            getTask.setMaxTime(maxtime);
             getTask.setTaskName(getTaskName());
             getTask.execute();
 
@@ -302,6 +309,25 @@ public class FetchTask extends Task {
         useCache = use;
     }
 
+    /**
+     *  Set timeout, 0 is default
+     */
+    public void setMaxtime(int maxtime) {
+        this.maxtime = maxtime;
+    }
+    
+    public int getMaxtime() {
+        return maxtime;
+    }
+    
+    public boolean isFailonerror() {
+        return failonerror;
+    }
+
+    public void setFailonerror(boolean failonerror) {
+        this.failonerror = failonerror;
+    }
+    
     /**
      *  Extract filename from URL
      */
