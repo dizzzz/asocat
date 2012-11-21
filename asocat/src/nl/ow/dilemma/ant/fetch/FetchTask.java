@@ -127,7 +127,11 @@ public class FetchTask extends Task {
                     // Move file
                     File destFile = new File(destination, filename);
                     log("Moving to " + destFile.getAbsolutePath());
-                    tmpFile.renameTo(destFile);
+                    boolean success = tmpFile.renameTo(destFile);
+                    if(!success){
+                        copyFileToDirectory(tmpFile, filename, destFile.getParentFile());
+                        tmpFile.delete();
+                    }
                 }
             }
 
