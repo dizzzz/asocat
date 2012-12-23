@@ -129,8 +129,13 @@ public class FetchTask extends Task {
                     log("Moving to " + destFile.getAbsolutePath());
                     boolean success = tmpFile.renameTo(destFile);
                     if(!success){
+                        // Fallback
                         copyFileToDirectory(tmpFile, filename, destFile.getParentFile());
-                        tmpFile.delete();
+                        success=tmpFile.delete();
+                        if(!success){
+                            log("Could not remove " + tmpFile.getCanonicalPath());
+                            tmpFile.deleteOnExit();
+                        }
                     }
                 }
             }
