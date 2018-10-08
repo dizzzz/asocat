@@ -49,7 +49,7 @@ public class GZipHelperTest extends TestCase {
     public void testGzipRoundTrip() throws Exception {
         System.out.println("testGzipRoundTrip");
         
-        File src = new File("data/jars/xmldb.jar");
+        File src = new File(getClass().getResource("/xmldb.jar").toURI());
         byte[] srcData=Tools.readArrayFromFile(src);
         
         // Gzip

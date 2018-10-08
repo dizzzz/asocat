@@ -9,12 +9,6 @@ package nl.ow.dilemma.ant.jar;
 
 import junit.framework.*;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import org.apache.tools.ant.BuildException;
-import org.apache.tools.ant.DirectoryScanner;
-import org.apache.tools.ant.Task;
-import org.apache.tools.ant.types.FileSet;
 
 /**
  *
