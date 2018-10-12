@@ -22,10 +22,6 @@
 package nl.ow.dilemma.ant.svn;
 
 import junit.framework.*;
-import java.io.File;
-import java.io.FileInputStream;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
 
 /**
  *
