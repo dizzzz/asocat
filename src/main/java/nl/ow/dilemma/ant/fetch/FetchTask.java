@@ -62,6 +62,8 @@ public class FetchTask extends Task {
     private int maxtime=0;
     private boolean failonerror=true;
 
+    private boolean failonzeroextracted=false;
+
     /**
      *  Execute task, called by Ant after setting all attributes. If no patterns are set
      * the file is not extracted nor deleted
@@ -204,7 +206,7 @@ public class FetchTask extends Task {
         }
 
         // Setup expand task
-        Expand expandTask = new Expand();
+        ExtendedExpand expandTask = new ExtendedExpand();
         expandTask.setProject(getProject());
         expandTask.setSrc(zipFile);
         expandTask.setDest(getCanonicalFile(unzipDirectory));
@@ -221,6 +223,10 @@ public class FetchTask extends Task {
 
         // Perform actual unzip
         expandTask.execute();
+
+        if (failonzeroextracted && expandTask.getExtractedFiles().isEmpty()) {
+            throw new BuildException("Fetch option failonzeroextracted=true is set, but Zero files were extracted from: " + zipFile.getAbsolutePath());
+        }
     }
 
     /**
@@ -336,7 +342,15 @@ public class FetchTask extends Task {
     public void setFailonerror(boolean failonerror) {
         this.failonerror = failonerror;
     }
-    
+
+    public boolean isFailonzeroextracted() {
+        return failonzeroextracted;
+    }
+
+    public void setFailonzeroextracted(boolean failonzeroextracted) {
+        this.failonzeroextracted = failonzeroextracted;
+    }
+
     /**
      *  Extract filename from URL
      */
